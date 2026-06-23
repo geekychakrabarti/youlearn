@@ -182,6 +182,12 @@ MIT — see [LICENSE](LICENSE). Fork it, build on it, make it your own.
 
 ---
 
+## Documentation
+
+- [Technical Documentation](docs/TECHNICAL.md) — architecture, API reference, feature internals, database schema
+
+---
+
 ## Acknowledgements
 
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) — YouTube downloading
