@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouLearn</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=3" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon-180.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/favicon-192.png" />
+  <link rel="stylesheet" href="/static/style.css?v=111" />
+</head>
+<body>
+  <!-- LEFT PANEL: Library + Discover -->
+  <aside id="library-panel">
+    <div class="panel-header">
+      <span class="logo">YouLearn</span>
+      <div class="panel-tabs">
+        <button class="panel-tab active" data-panel="library">Library</button>
+        <button class="panel-tab" data-panel="discover">Discover</button>
+      </div>
+      <button id="btn-new-playlist" title="New playlist">+</button>
+      <button id="btn-help" title="Help & Documentation">?</button>
+    </div>
+
+    <!-- LIBRARY VIEW -->
+    <div id="library-view">
+      <div class="search-bar">
+        <input id="search-input" type="text" placeholder="Search library… (in:transcripts · in:current)" />
+        <button id="library-clear-btn" title="Clear search" style="display:none">✕</button>
+        <button id="btn-transcript-search" title="Search transcripts (Enter)">⌕</button>
+        <div id="library-search-hint" class="search-hint" style="display:none">
+          <div class="lib-hint-row" data-op="in:transcripts">in:transcripts <span>search transcript text</span></div>
+          <div class="lib-hint-row" data-op="in:current">in:current <span>scope to this playlist</span></div>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <span class="filter-label">Duration:</span>
+        <button class="dur-btn active" data-dur="">All</button>
+        <button class="dur-btn" data-dur="short">&lt;10m</button>
+        <button class="dur-btn" data-dur="medium">10-30m</button>
+        <button class="dur-btn" data-dur="long">30m+</button>
+        <button class="dur-btn" data-dur="custom">Custom</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Sort:</span>
+        <button class="lib-sort-btn active" data-order="added_at">Newest</button>
+        <button class="lib-sort-btn" data-order="title">Title</button>
+        <button class="lib-sort-btn" data-order="duration">Duration</button>
+      </div>
+      <div id="custom-duration-row" style="display:none">
+        <input id="custom-dur-min" type="number" min="0" placeholder="min" />
+        <span class="filter-label">–</span>
+        <input id="custom-dur-max" type="number" min="0" placeholder="max (min)" />
+        <button id="custom-dur-apply">Go</button>
+      </div>
+
+      <div id="tag-chips"></div>
+
+      <!-- Transcript search results (shown when Enter pressed in search) -->
+      <div id="transcript-results" style="display:none">
+        <div class="results-header">
+          <span id="transcript-results-label">Transcript matches</span>
+        </div>
+        <div id="transcript-results-list"></div>
+      </div>
+
+
+
+      <div id="playlist-list"></div>
+    </div>
+
+    <!-- DISCOVER VIEW -->
+    <div id="discover-view" style="display:none">
+      <div class="search-bar" style="position:relative">
+        <input id="discover-input" type="text" placeholder="Search YouTube… (try: from:BlenderGuru)" />
+        <button id="discover-clear-btn" title="Clear search" style="display:none">✕</button>
+        <button id="btn-discover-search" title="Search">⌕</button>
+        <div id="search-hint" class="search-hint" style="display:none">
+          <div class="hint-row" data-op="duration:short">duration:short <span>videos under 4 min</span></div>
+          <div class="hint-row" data-op="duration:medium">duration:medium <span>4–20 min</span></div>
+          <div class="hint-row" data-op="duration:long">duration:long <span>over 20 min</span></div>
+          <div class="hint-row" data-op="order:views">order:views <span>sort by most viewed</span></div>
+          <div class="hint-row" data-op="order:recent">order:recent <span>sort by newest</span></div>
+          <div class="hint-row" data-op="from:">from:channel <span>scope to a creator</span></div>
+          <div class="hint-row" data-op="category:education">category:education <span>Education category</span></div>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Duration:</span>
+        <button class="disc-dur-btn active" data-dur="">All</button>
+        <button class="disc-dur-btn" data-dur="short">&lt;10m</button>
+        <button class="disc-dur-btn" data-dur="medium">10-30m</button>
+        <button class="disc-dur-btn" data-dur="long">30m+</button>
+        <button class="disc-dur-btn" data-dur="custom">Custom</button>
+      </div>
+      <div id="teachers-sort-row" class="filter-row">
+        <span class="filter-label">Sort:</span>
+        <button class="sort-btn active" data-order="relevance">Relevant</button>
+        <button class="sort-btn" data-order="viewCount">Most Viewed</button>
+        <button class="sort-btn" data-order="date">Recent</button>
+      </div>
+      <div id="disc-custom-duration-row" style="display:none">
+        <input id="disc-custom-dur-min" type="number" min="0" placeholder="min" />
+        <span class="filter-label">–</span>
+        <input id="disc-custom-dur-max" type="number" min="0" placeholder="max (min)" />
+        <button id="disc-custom-dur-apply">Go</button>
+      </div>
+      <!-- Following section — compact pills, always visible when teachers exist -->
+      <div id="following-section" style="display:none">
+        <div class="following-header">
+          <span class="following-label">Following</span>
+        </div>
+        <div id="following-pills"></div>
+      </div>
+      <div id="related-back-bar" style="display:none">
+        <button id="btn-related-back">← Back to search</button>
+        <span id="related-back-label"></span>
+      </div>
+      <div id="discover-status" class="discover-status"></div>
+      <div id="discover-results"></div>
+    </div>
+  </aside>
+
+  <!-- CENTER PANEL: Player -->
+  <main id="player-panel">
+    <div id="empty-state">
+      <div class="empty-state-top">
+        <img src="/static/empty-state-icon.svg" alt="YouLearn" class="empty-state-icon" />
+        <div class="empty-state-brand">
+          <span class="empty-state-name">YouLearn</span>
+          <span class="empty-state-tagline">Distraction-free learning</span>
+        </div>
+      </div>
+      <div class="empty-state-mid">
+        <p>Select a video from the library to start watching.</p>
+      <p class="hint">
+        <kbd>M</kbd> highlight &nbsp;
+        <kbd>N</kbd> note &nbsp;
+        <kbd>Q</kbd> question &nbsp;
+        <kbd>S</kbd> skip &nbsp;
+        <kbd>J</kbd>/<kbd>K</kbd> prev/next clip &nbsp;
+        <kbd>Space</kbd> play/pause &nbsp;
+        <kbd>←</kbd><kbd>→</kbd> ±5s &nbsp;
+        <kbd>?</kbd> all shortcuts
+      </p>
+      </div>
+    </div>
+
+    <div id="player-wrap" style="display:none">
+      <div id="video-title-bar">
+        <div id="normal-title-row">
+          <span id="video-title-text"></span>
+          <div id="video-tags-inline"></div>
+          <div id="library-related-btns"></div>
+        </div>
+        <div id="preview-actions" style="display:none">
+          <span id="preview-label">▶ Preview</span>
+          <div id="preview-related-btns"></div>
+          <button id="btn-preview-add">＋ Add to playlist</button>
+          <button id="btn-preview-close">✕ Close</button>
+        </div>
+      </div>
+      <div id="yt-player-container">
+        <div id="yt-player"></div>
+      </div>
+      <div id="timeline-bar">
+        <div id="timeline-track">
+          <div id="timeline-buffer"></div>
+          <div id="timeline-playhead"></div>
+          <div id="timeline-layer-clips"></div>
+          <div id="timeline-layer-annotations"></div>
+          <div id="timeline-layer-search"></div>
+        </div>
+        <div id="time-display"><span id="time-current">0:00</span> / <span id="time-total">0:00</span></div>
+      </div>
+      <div id="player-controls">
+        <button id="btn-prev-clip" title="Prev clip (J)">⏮</button>
+        <button id="btn-seek-back" title="–5s (←)">◀5s</button>
+        <button id="btn-playpause" title="Play/Pause (Space)">▶</button>
+        <button id="btn-seek-fwd" title="+5s (→)">5s▶</button>
+        <button id="btn-next-clip" title="Next clip (K)">⏭</button>
+        <div class="mark-btns">
+          <button id="btn-mark-highlight" class="mark-btn highlight" title="Highlight range — tap twice (M)"><span class="mark-icon mark-icon-highlight">▬</span> Mark</button>
+          <button id="btn-mark-note" class="mark-btn note" title="Note at current time (N)"><span class="mark-icon mark-icon-note">●</span> Note</button>
+          <button id="btn-mark-question" class="mark-btn question" title="Question (Q)"><span class="mark-icon mark-icon-question">▲</span> Question</button>
+          <button id="btn-mark-skip" class="mark-btn skip" title="Skip section — tap twice (S)"><span class="mark-icon mark-icon-skip">░</span> Skip</button>
+        </div>
+        <button id="btn-theatre" title="Theatre mode (T)">⤢</button>
+      </div>
+      <div id="status-bar"></div>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL: Notes -->
+  <aside id="notes-panel">
+    <div class="panel-header">
+      <span id="notes-video-title">Notes</span>
+      <div class="export-btns" style="display:none" id="export-btns">
+        <button id="btn-export-study" title="Export Study Sheet">⬇ Study Sheet</button>
+        <button id="btn-export-json" title="Export JSON">⬇ JSON</button>
+      </div>
+      <button id="btn-whats-next" title="What should I learn next? (uses Ollama)">✦ What's next?</button>
+    </div>
+    </div>
+
+    <!-- What's next suggestions panel -->
+    <div id="whats-next-panel" style="display:none">
+      <div id="whats-next-header">
+        <span>✦ Suggested next topics</span>
+        <button id="btn-whats-next-close">✕</button>
+      </div>
+      <div id="whats-next-loading" style="display:none">
+        <span>Thinking…</span>
+      </div>
+      <div id="whats-next-results"></div>
+    </div>
+
+    <div class="notes-tabs">
+      <button class="tab-btn active" data-tab="all">All</button>
+      <button class="tab-btn" data-tab="clips">Clips</button>
+      <button class="tab-btn" data-tab="notes">Notes</button>
+      <button class="tab-btn" data-tab="questions">Questions</button>
+      <button class="tab-btn" data-tab="chapters" id="tab-btn-chapters" style="display:none">Chapters</button>
+    </div>
+
+    <div id="tab-all" class="tab-content active">
+      <div id="all-list"></div>
+    </div>
+    <div id="tab-clips" class="tab-content">
+      <div id="clips-list"></div>
+    </div>
+    <div id="tab-notes" class="tab-content">
+      <div id="notes-list"></div>
+    </div>
+    <div id="tab-questions" class="tab-content">
+      <div id="questions-list"></div>
+    </div>
+    <div id="tab-chapters" class="tab-content">
+      <div id="chapters-list"></div>
+      <div id="transcript-search-section" style="display:none">
+        <div class="tsearch-bar">
+          <input id="tsearch-input" type="text" placeholder="Search transcript…" />
+          <button id="tsearch-clear" title="Clear search" style="display:none">✕</button>
+          <button id="tsearch-btn">⌕</button>
+        </div>
+        <div id="tsearch-status"></div>
+        <div id="tsearch-results"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Modals -->
+  <div id="modal-overlay" style="display:none">
+    <div id="modal-box">
+      <div id="modal-content"></div>
+      <div class="modal-actions">
+        <button id="modal-cancel">Cancel</button>
+        <button id="modal-ok" class="primary">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- Keybinding help overlay (press ?) -->
+  <div id="help-overlay" style="display:none">
+    <div id="help-box">
+      <div class="help-header">
+        <span>Keyboard Shortcuts</span>
+        <button id="btn-close-help">✕</button>
+      </div>
+      <div class="help-grid">
+        <div class="help-section">
+          <div class="help-section-title">Playback</div>
+          <div class="help-row"><kbd>Space</kbd><span>Play / Pause</span></div>
+          <div class="help-row"><kbd>←</kbd><kbd>→</kbd><span>Seek ±5 seconds</span></div>
+          <div class="help-row"><kbd>T</kbd><span>Theatre mode (hide panels)</span></div>
+          <div class="help-row"><kbd>J</kbd><span>Previous clip</span></div>
+          <div class="help-row"><kbd>K</kbd><span>Next clip</span></div>
+          <div class="help-row"><kbd>[</kbd><kbd>]</kbd><span>Prev / next transcript search match</span></div>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title">Marking</div>
+          <div class="help-row"><kbd>M</kbd><span>Highlight range — tap twice for start/end</span></div>
+          <div class="help-row"><kbd>N</kbd><span>Note at current time</span></div>
+          <div class="help-row"><kbd>Q</kbd><span>Question</span></div>
+          <div class="help-row"><kbd>S</kbd><span>Skip section — tap twice for start/end</span></div>
+          <div class="help-row"><kbd>C</kbd><span>Clip current transcript search match</span></div>
+          <div class="help-row"><kbd>Esc</kbd><span>Cancel pending mark</span></div>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title">App</div>
+          <div class="help-row"><kbd>?</kbd><span>Toggle this help</span></div>
+          <div class="help-row"><kbd>Enter</kbd><span>Search transcripts (in search bar)</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Onboarding tour overlay -->
+  <div id="tour-overlay" style="display:none">
+    <div id="tour-backdrop"></div>
+    <div id="tour-spotlight"></div>
+    <div id="tour-tooltip">
+      <div id="tour-step-label"></div>
+      <div id="tour-title"></div>
+      <div id="tour-desc"></div>
+      <div id="tour-footer">
+        <button id="tour-skip">Skip tour</button>
+        <div id="tour-nav">
+          <span id="tour-progress"></span>
+          <button id="tour-prev">←</button>
+          <button id="tour-next">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help modal -->
+  <div id="help-modal" style="display:none">
+    <div id="help-backdrop"></div>
+    <div id="help-panel">
+      <div id="help-header">
+        <span id="help-title">YouLearn — Help</span>
+        <button id="btn-help-close">✕</button>
+      </div>
+      <div id="help-body">
+        <div class="help-section">
+          <h3>Getting Started</h3>
+          <p>Create a playlist with the <strong>+</strong> button, then add videos from Discover or paste a YouTube URL.</p>
+        </div>
+
+        <div class="help-section">
+          <h3>Library Search</h3>
+          <p>Type in the search box to filter by title or semantic tags.</p>
+          <ul>
+            <li><code>in:transcripts</code> — search spoken content in transcripts</li>
+            <li><code>in:current</code> — scope to the active playlist only</li>
+            <li>Combine: <code>camera view in:transcripts in:current</code></li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>Discover Search Operators</h3>
+          <ul>
+            <li><code>from:channel</code> — videos from a specific creator</li>
+            <li><code>duration:short</code> / <code>medium</code> / <code>long</code> — filter by length</li>
+            <li><code>order:views</code> / <code>order:recent</code> — sort results</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>Keyboard Shortcuts</h3>
+          <table class="help-table">
+            <tr><td><kbd>M</kbd></td><td>Highlight range (two-tap)</td></tr>
+            <tr><td><kbd>N</kbd></td><td>Add note at current time</td></tr>
+            <tr><td><kbd>Q</kbd></td><td>Add question at current time</td></tr>
+            <tr><td><kbd>S</kbd></td><td>Skip zone (two-tap)</td></tr>
+            <tr><td><kbd>J</kbd> / <kbd>K</kbd></td><td>Previous / next marker</td></tr>
+            <tr><td><kbd>[</kbd> / <kbd>]</kbd></td><td>Navigate transcript search matches</td></tr>
+            <tr><td><kbd>Space</kbd></td><td>Play / pause</td></tr>
+            <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>±5 seconds</td></tr>
+            <tr><td><kbd>T</kbd></td><td>Theatre mode (hide panels)</td></tr>
+            <tr><td><kbd>?</kbd></td><td>Show all shortcuts</td></tr>
+          </table>
+        </div>
+
+        <div class="help-section">
+          <h3>While Watching a Video</h3>
+          <ul>
+            <li><strong>All tab</strong> — chapters, clips, notes and questions in time order. Click any item to jump to it.</li>
+            <li><strong>Chapters tab</strong> — search transcripts with <code>[</code> / <code>]</code> to navigate matches.</li>
+            <li><strong>↩ Similar projects</strong> — finds YouTube videos on the same topic at similar length.</li>
+            <li><strong>Study Sheet</strong> — exports your chapters, questions and notes with timestamps.</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h3>Tips</h3>
+          <ul>
+            <li>Semantic tags on video cards are clickable — use them to filter your library.</li>
+            <li>Click a playlist name twice to rename it. Use ▾ to collapse playlists.</li>
+            <li>Transcript search stays open so you can click multiple results without re-searching.</li>
+            <li>Sort your library by Newest, Title A→Z, or Duration ↑/↓ — click again to reverse.</li>
+          </ul>
+        </div>
+
+        <div class="help-footer">
+          <button id="btn-help-tour">↺ Restart tour</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="/static/app.js?v=140"></script>
+  <script src="/static/tour.js"></script>
+</body>
+</html>
