@@ -184,6 +184,7 @@ MIT — see [LICENSE](LICENSE). Fork it, build on it, make it your own.
 
 ## Documentation
 
+- [User Guide](docs/USER_GUIDE.md) — screen-by-screen guide to every feature
 - [Technical Documentation](docs/TECHNICAL.md) — architecture, API reference, feature internals, database schema
 
 ---
