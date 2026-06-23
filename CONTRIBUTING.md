@@ -5,7 +5,7 @@ Thanks for your interest! YouLearn is a focused tool — contributions that keep
 ## Running locally
 
 ```bash
-git clone https://github.com/yourusername/youlearn.git
+git clone https://github.com/geekychakrabarti/youlearn.git
 cd youlearn
 uv sync
 brew install ffmpeg          # macOS

@@ -46,7 +46,7 @@
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # 2. Clone the repo
-git clone https://github.com/yourusername/youlearn.git
+git clone https://github.com/geekychakrabarti/youlearn.git
 cd youlearn
 
 # 3. Install ffmpeg
