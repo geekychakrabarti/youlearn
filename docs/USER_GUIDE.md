@@ -37,6 +37,10 @@ When you first open YouLearn, you'll see:
 
 ## Library Tab
 
+![Library screen with labelled features](images/library-annotated.svg)
+
+> Hover over any label in the image above to navigate to that section of this guide (click in GitHub to follow the link).
+
 The Library is your personal collection of YouTube videos, organised into playlists.
 
 ### Playlists
@@ -88,6 +92,10 @@ Topic tags appear below the sort row. Click a tag to filter. Click multiple tags
 ---
 
 ## Discover Tab
+
+![Discover screen with labelled features](images/discover-annotated.svg)
+
+> Hover over any label above to navigate to that section of this guide (click in GitHub to follow the link).
 
 Discover lets you search YouTube without distractions. No autoplay, no recommendations sidebar — just search results you can preview and add to your library.
 

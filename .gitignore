@@ -1,17 +1,17 @@
 # .gitignore for YouLearn
 
-# ── Secrets & config ──────────────────────────────
-config.json          # contains API keys and personal paths
+# Secrets and config (never commit these)
+config.json
 *.env
 
-# ── Data (personal, large, or machine-specific) ───
+# Data
 data/
 exports/
 videos/
 *.db
 *.sqlite
 
-# ── Python ────────────────────────────────────────
+# Python
 __pycache__/
 *.py[cod]
 *.pyo
@@ -20,23 +20,25 @@ __pycache__/
 dist/
 build/
 
-# ── Node (if ever added) ──────────────────────────
-node_modules/
-
-# ── macOS ─────────────────────────────────────────
+# macOS
 .DS_Store
 .AppleDouble
-.LSOverride
 *.icloud
 
-# ── Session / development files ───────────────────
+# Session files
 SESSION_CONTEXT.md
 SESSION_NOTES.md
 screenshots/
 .playwright-mcp/
 
-# ── App bundle (built, not committed) ─────────────
+# Dev tools
+docs/make_annotations.py
+
+# App bundle (built, not source)
 /Applications/YouLearn.app
 
-# ── Logs ──────────────────────────────────────────
+# Node (if ever added)
+node_modules/
+
+# Logs
 *.log
