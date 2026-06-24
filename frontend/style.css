@@ -948,6 +948,13 @@ kbd { background: var(--bg3); border: 1px solid var(--border); border-radius: 3p
 .help-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .help-table td { padding: 4px 8px; color: var(--text2); }
 .help-table td:first-child { width: 120px; white-space: nowrap; }
+.help-docs-link { display: flex; gap: 10px; flex-wrap: wrap; }
+.help-docs-link a {
+  display: inline-block; padding: 6px 14px; border-radius: 8px;
+  background: var(--bg3); border: 1px solid var(--accent); color: var(--accent);
+  font-size: 12px; font-weight: 600; text-decoration: none; white-space: nowrap;
+}
+.help-docs-link a:hover { background: var(--accent); color: #fff; }
 .help-footer { padding: 12px 20px; border-top: 1px solid var(--border); }
 #btn-help-tour {
   background: var(--bg3); border: 1px solid var(--border); color: var(--text2);

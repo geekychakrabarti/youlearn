@@ -15,6 +15,7 @@ from pathlib import Path
 
 PORT = 8000
 URL = f"http://localhost:{PORT}"
+DOCS_URL = "https://github.com/geekychakrabarti/youlearn/blob/main/docs/USER_GUIDE.md"
 PROJECT_DIR = Path(__file__).parent
 
 # Resolve uv — works even when launched from .app bundle with stripped PATH
@@ -118,10 +119,7 @@ class YouLearnApp(rumps.App):
 
     @rumps.clicked("📖 Help & Documentation")
     def open_help(self, _):
-        if _is_running():
-            webbrowser.open(f"{URL}#open-help")
-        else:
-            threading.Thread(target=self._do_start, daemon=True).start()
+        webbrowser.open(DOCS_URL)
 
     @rumps.clicked("📁 Set Storage Location…")
     def set_storage(self, _):
