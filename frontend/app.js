@@ -310,7 +310,7 @@ async function handleClipKey(type) {
     return;
   }
 
-  // S = skip — two-tap like M: first tap sets start, second sets end
+  // S = skip: first tap sets start, second sets end
   if (type === 'skip') {
     if (!state.pendingClip) {
       const t = state.ytPlayer.getCurrentTime();
@@ -838,7 +838,10 @@ async function openVideo(video) {
   }
   state.activeVideoId = video.id;
   state.activeVideo = video;
-  // Ensure activePlaylistId is set so the library panel highlights correctly
+  // Reset detect questions button state for new video
+  const detectBtn = document.getElementById('btn-detect-questions');
+  if (detectBtn) { detectBtn.dataset.state = ''; detectBtn.textContent = '✦ Detect questions in transcript'; detectBtn.disabled = false; }
+  updateDetectQuestionsBar();
   if (!state.activePlaylistId && video.playlist_id) {
     state.activePlaylistId = video.playlist_id;
   }
@@ -991,38 +994,17 @@ function renderTimelineMarkers() {
   state.notes.forEach(n => {
     if (n.timestamp_seconds == null) return;
     const mark = document.createElement('div');
-    mark.className = n.is_question ? 'tl-question' : 'tl-note';
+    const isOllama = n.source === 'ollama';
+    mark.className = n.is_question ? (isOllama ? 'tl-question-detected' : 'tl-question') : 'tl-note';
     mark.style.left = `${(n.timestamp_seconds / dur) * 100}%`;
     mark.title = n.body ? `${fmtTime(n.timestamp_seconds)} — ${n.body}` : fmtTime(n.timestamp_seconds);
     mark.onclick = () => {
       seekTo(n.timestamp_seconds);
-      // Switch to the right tab and scroll to the item
       const tab = n.is_question ? 'questions' : 'notes';
       switchTab(tab);
       setTimeout(() => {
         const item = [...document.querySelectorAll(`#${tab}-list .note-item`)]
           .find(el => Math.abs(parseFloat(el.dataset.ts) - n.timestamp_seconds) < 0.5);
-        item?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        item?.classList.add('now-playing');
-        setTimeout(() => item?.classList.remove('now-playing'), 1500);
-      }, 100);
-    };
-    annotLayer.appendChild(mark);
-  });
-
-  // Also show extract/question clips that came from the E key (no note entry)
-  state.clips.forEach(c => {
-    if (c.type !== 'extract') return;
-    const mark = document.createElement('div');
-    mark.className = 'tl-question';
-    mark.style.left = `${(c.timestamp_seconds / dur) * 100}%`;
-    mark.title = `${fmtTime(c.timestamp_seconds)} — ${c.label || 'video question'}`;
-    mark.onclick = () => {
-      seekTo(c.timestamp_seconds);
-      switchTab('questions');
-      setTimeout(() => {
-        const item = [...document.querySelectorAll('#questions-list .note-item')]
-          .find(el => Math.abs(parseFloat(el.dataset.ts) - c.timestamp_seconds) < 0.5);
         item?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         item?.classList.add('now-playing');
         setTimeout(() => item?.classList.remove('now-playing'), 1500);
@@ -1163,23 +1145,8 @@ function renderNotesList(which) {
   container.innerHTML = '';
   const filtered = state.notes.filter(n => isQ ? n.is_question : !n.is_question);
 
-  // For Questions tab, also include 'extract' type clips (video questions marked with E key)
-  // These only have a clip entry, no corresponding note entry
-  const extraItems = isQ
-    ? state.clips
-        .filter(c => c.type === 'extract')
-        .map(c => ({
-          id: `clip-${c.id}`,
-          timestamp_seconds: c.timestamp_seconds,
-          body: c.label || 'video question',
-          is_question: true,
-          _isClip: true,
-          _clipId: c.id,
-        }))
-    : [];
-
-  // Merge and sort by timestamp
-  const allItems = [...filtered, ...extraItems].sort(
+  // Merge and sort by timestamp (ollama questions mixed in with user questions)
+  const allItems = [...filtered].sort(
     (a, b) => (a.timestamp_seconds ?? 0) - (b.timestamp_seconds ?? 0)
   );
 
@@ -1190,15 +1157,17 @@ function renderNotesList(which) {
   }
 
   allItems.forEach(n => {
+    const isOllama = n.source === 'ollama';
     const item = document.createElement('div');
-    item.className = 'note-item' + (n.is_question ? ' is-question' : '');
-    if (n._isClip) item.className += ' extract-item';
+    item.className = 'note-item' + (n.is_question ? ' is-question' : '') + (isOllama ? ' ollama-question' : '');
     if (n.body) item.title = n.body;
     const ts = n.timestamp_seconds != null ? `<span class="note-ts">${fmtTime(n.timestamp_seconds)}</span>` : '';
-    const icon = n._isClip ? '▲' : (n.is_question ? '▲' : '●');
-    const iconClass = n._isClip ? 'note-icon note-icon-question' : (n.is_question ? 'note-icon note-icon-question' : 'note-icon note-icon-note');
-    item.innerHTML = `<span class="${iconClass}">${icon}</span>${ts}<span class="note-body">${n.body}</span>${n._isClip ? '' : '<button class="item-del" title="Delete">✕</button>'}`;
-    if (!n._isClip) item.querySelector('.item-del').onclick = (e) => { e.stopPropagation(); deleteNote(n.id); };
+    const iconClass = n.is_question ? 'note-icon note-icon-question' : 'note-icon note-icon-note';
+    const icon = n.is_question ? '▲' : '●';
+    const badge = isOllama ? '<span class="ai-badge">AI</span>' : '';
+    const delBtn = isOllama ? '' : '<button class="item-del" title="Delete">✕</button>';
+    item.innerHTML = `<span class="${iconClass}">${icon}</span>${ts}${badge}<span class="note-body">${n.body}</span>${delBtn}`;
+    if (!isOllama) item.querySelector('.item-del').onclick = (e) => { e.stopPropagation(); deleteNote(n.id); };
     if (n.timestamp_seconds != null) item.onclick = () => seekTo(n.timestamp_seconds);
     item.dataset.ts = n.timestamp_seconds ?? '';
     container.appendChild(item);
@@ -1264,6 +1233,7 @@ async function deleteVideo(id) {
     document.getElementById('empty-state').style.display = 'flex';
     document.getElementById('tab-btn-chapters').style.display = 'none';
     document.getElementById('transcript-search-section').style.display = 'none';
+    document.getElementById('questions-detect-bar').style.display = 'none';
     switchTab('all');
   }
   await loadVideos(); toast('Video removed');
@@ -1302,13 +1272,13 @@ document.addEventListener('keydown', (e) => {
     case 't': case 'T': if (state.activeVideoId) toggleTheatreMode(); break;    case 'm': case 'M': handleClipKey('highlight'); break;
     case 'n': case 'N': handleClipKey('note'); break;
     case 'q': case 'Q': handleClipKey('question'); break;
-    case 'e': case 'E': handleClipKey('extract'); break;
+    case 'c': case 'C': smartClipAtPlayhead(); break;
     case 's': case 'S': handleClipKey('skip'); break;
     case 'j': case 'J': prevClip(); break;
     case 'k': case 'K': nextClip(); break;
     case '[':           e.preventDefault(); tsearchNav(-1); break;
     case ']':           e.preventDefault(); tsearchNav(+1); break;
-    case 'c': case 'C': markCurrentSearchMatch(); break;
+    case 'c': case 'C': smartClipAtPlayhead(); break;
     case 'Escape':
       if (document.body.classList.contains('theatre-mode')) toggleTheatreMode();
       else cancelPending();
@@ -2149,6 +2119,50 @@ async function markCurrentSearchMatch() {
   });
   await loadClipsAndNotes();
   toast(`⭐ Clipped at ${fmtTime(entry.start)} — ] for next match`);
+}
+
+/* ── Smart clip at playhead (C key) — Ollama finds idea boundary ── */
+async function smartClipAtPlayhead() {
+  if (!state.ytPlayer || !state.activeVideoId || state.previewVideo) return;
+  if (!state.previewTranscript.length) { toast('No transcript available for smart clip'); return; }
+
+  const t = state.ytPlayer.getCurrentTime();
+  // Find transcript entry containing current playhead
+  let idx = state.previewTranscript.findIndex(
+    (e, i) => e.start <= t && t < (state.previewTranscript[i + 1]?.start ?? e.start + (e.duration || 5))
+  );
+  if (idx === -1) idx = state.previewTranscript.filter(e => e.start <= t).length - 1;
+  if (idx < 0) { toast('Playhead is before transcript start'); return; }
+
+  // Use playhead ±15s as rough range — Ollama will tighten to idea boundary
+  const roughStart = Math.max(0, t - 15);
+  const roughEnd = t + 15;
+  const video = state.videos.find(v => v.id === state.activeVideoId);
+  const ytId = video?.youtube_id;
+  if (!ytId) return;
+
+  toast('✨ Finding idea boundary…', 4000);
+  try {
+    const result = await api.post('/api/videos/refine-clip', {
+      youtube_id: ytId,
+      start_seconds: roughStart,
+      end_seconds: roughEnd,
+    });
+    const clipStart = result.start ?? roughStart;
+    const clipEnd = result.end ?? roughEnd;
+    const label = state.previewTranscript.find(e => e.start >= clipStart)?.text?.slice(0, 60) || '';
+    await api.post('/api/clips', {
+      video_id: state.activeVideoId,
+      timestamp_seconds: clipStart,
+      end_seconds: clipEnd,
+      label,
+      type: 'highlight',
+    });
+    await loadClipsAndNotes();
+    toast(`⭐ Clipped ${fmtTime(clipStart)} → ${fmtTime(clipEnd)}${result.reason ? ' — ' + result.reason : ''}`);
+  } catch (e) {
+    toast('Smart clip failed — is Ollama running?');
+  }
 }
 
 /* ── Ollama clip edge refinement ── */
@@ -3206,3 +3220,40 @@ document.getElementById('help-overlay').addEventListener('click', (e) => {
     btn.style.opacity = '0.5';
   }
 })();
+
+/* ── Detect questions button ── */
+function updateDetectQuestionsBar() {
+  const bar = document.getElementById('questions-detect-bar');
+  if (!bar) return;
+  // Show only for Library videos (not preview), when Ollama is available
+  const visible = !!state.activeVideoId && !state.previewVideo && state.ollamaAvailable !== false;
+  bar.style.display = visible ? 'block' : 'none';
+}
+
+document.getElementById('btn-detect-questions').addEventListener('click', async function () {
+  const btn = this;
+  const isReanalyse = btn.dataset.state === 'done';
+  const video = state.videos.find(v => v.id === state.activeVideoId);
+  if (!video) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Analysing transcript…';
+
+  try {
+    const result = await api.post('/api/notes/detect-questions', {
+      video_id: video.id,
+      youtube_id: video.youtube_id,
+      force: isReanalyse,
+    });
+    await loadClipsAndNotes();
+    const n = result.count || 0;
+    btn.dataset.state = 'done';
+    btn.textContent = `✓ ${n} question${n === 1 ? '' : 's'} detected · Re-analyse`;
+    btn.disabled = false;
+    if (n > 0) switchTab('questions');
+  } catch (e) {
+    btn.textContent = '✦ Detect questions in transcript';
+    btn.disabled = false;
+    toast('Question detection failed — is Ollama running?');
+  }
+});

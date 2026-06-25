@@ -235,6 +235,16 @@ kbd { background: var(--bg3); border: 1px solid var(--border); border-radius: 3p
   transition: transform 0.1s;
 }
 .tl-question:hover { transform: translateX(-50%) scale(1.5); }
+/* Ollama-detected question — hollow orange circle */
+.tl-question-detected {
+  position: absolute; top: calc(100% + 2px); transform: translateX(-50%);
+  width: 9px; height: 9px; border-radius: 50%;
+  background: transparent;
+  border: 2px solid var(--question);
+  pointer-events: all; cursor: pointer;
+  transition: transform 0.1s;
+}
+.tl-question-detected:hover { transform: translateX(-50%) scale(1.5); }
 
 /* ── Layer 3: Search dots (topmost, z=3) ── */
 #timeline-layer-search {
@@ -275,6 +285,22 @@ kbd { background: var(--bg3); border: 1px solid var(--border); border-radius: 3p
 .tab-btn.active { color: var(--accent2); border-bottom-color: var(--accent2); }
 .tab-content { display: none; flex: 1; overflow-y: auto; padding: 8px 0; }
 .tab-content.active { display: block; }
+/* Detect questions bar */
+#questions-detect-bar { padding: 8px 12px 4px; }
+#btn-detect-questions {
+  width: 100%; padding: 7px 12px; border-radius: var(--radius);
+  background: var(--bg3); border: 1px solid var(--accent); color: var(--accent);
+  font-size: 12px; font-weight: 600; text-align: left; cursor: pointer;
+}
+#btn-detect-questions:hover { background: var(--accent); color: #fff; }
+#btn-detect-questions:disabled { opacity: 0.5; cursor: default; }
+/* AI badge on Ollama-detected questions */
+.ai-badge {
+  font-size: 9px; font-weight: 700; color: var(--question);
+  opacity: 0.65; letter-spacing: 0.5px; margin-right: 3px;
+  vertical-align: middle;
+}
+.ollama-question .note-icon-question { opacity: 0.55; }
 
 .clip-item, .note-item {
   display: flex; align-items: flex-start; gap: 8px; padding: 7px 12px;

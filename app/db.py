@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS notes (
     timestamp_seconds REAL,
     body TEXT NOT NULL,
     is_question INTEGER DEFAULT 0,
+    source TEXT DEFAULT 'user',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -98,6 +99,14 @@ def get_db() -> sqlite3.Connection:
 def init_db():
     conn = get_db()
     conn.executescript(SCHEMA)
+    # Migrations for columns added after initial release
+    for migration in [
+        "ALTER TABLE notes ADD COLUMN source TEXT DEFAULT 'user'",
+    ]:
+        try:
+            conn.execute(migration)
+        except Exception:
+            pass  # Column already exists
     conn.commit()
     conn.close()
 
