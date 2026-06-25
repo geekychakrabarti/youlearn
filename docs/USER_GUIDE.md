@@ -37,6 +37,12 @@ When you first open YouLearn, you'll see:
 
 ## Library Tab
 
+![Library tab — overview](images/Library_1.png)
+*The Library panel: search, filters, tags, playlists, and video cards.*
+
+![Library tab — video open](images/Library_2.png)
+*A video open in YouLearn: player, timeline markers, transport bar, and Notes panel.*
+
 The Library is your personal collection of YouTube videos, organised into playlists.
 
 ### Playlists
@@ -88,6 +94,15 @@ Topic tags appear below the sort row. Click a tag to filter. Click multiple tags
 ---
 
 ## Discover Tab
+
+![Discover tab — filters and following](images/Discover_1.png)
+*Discover tab: search box, duration filter, sort options, and followed creators.*
+
+![Discover tab — search operators and history](images/Discover_2.png)
+*Clicking the search box reveals operator hints and your last 10 searches.*
+
+![Discover tab — search results with preview](images/Discover_3.png)
+*Search results with a video previewing in the player.*
 
 Discover lets you search YouTube without distractions. No autoplay, no recommendations sidebar — just search results you can preview and add to your library.
 
