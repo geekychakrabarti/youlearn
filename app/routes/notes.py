@@ -132,41 +132,38 @@ def detect_questions(body: DetectQuestionsBody):
         conn.close()
         return {"questions": [], "count": 0, "error": "transcript parse error"}
 
-    # Build timestamped transcript string — only entries containing '?'
-    # so Ollama has no non-question material to confuse with questions
-    question_lines = []
-    all_lines = []
+    # Build timestamped transcript string (up to 4000 chars)
+    lines = []
     chars = 0
     for e in transcript:
         text = e.get('text', '').strip()
+        if not text:
+            continue
         line = f"[{e.get('start', 0):.1f}s] {text}"
         if chars + len(line) > 4000:
             break
-        all_lines.append(line)
+        lines.append(line)
         chars += len(line)
-        if '?' in text:
-            question_lines.append(line)
+    transcript_text = "\n".join(lines)
 
-    # If no '?' in transcript at all, skip Ollama — nothing to find
-    if not question_lines:
+    if not transcript_text:
         conn.close()
-        return {"questions": [], "count": 0, "reason": "no questions found in transcript"}
-
-    # Use only question-containing lines — prevents Ollama inventing questions from statements
-    transcript_text = "\n".join(question_lines)
+        return {"questions": [], "count": 0, "reason": "no transcript text"}
 
     prompt = (
-        "You are analysing a video transcript. Your task is to find ONLY genuine questions — "
-        "sentences that end with a question mark and directly ask something of the viewer or invite reflection.\n\n"
-        "Rules:\n"
-        "- Include ONLY interrogative sentences that end with '?'\n"
-        "- Do NOT include statements, tips, steps, descriptions, or sentences that do not end with '?'\n"
+        "You are analysing a video transcript. Note: this transcript may have no punctuation "
+        "because it was auto-generated.\n\n"
+        "Your task: find sentences where the presenter ASKS something — rhetorical questions, "
+        "invitations to think, 'what if', 'have you ever', 'why does', 'how do you' constructions, "
+        "or direct questions to the viewer. These are questions by MEANING even without a '?'.\n\n"
+        "Strict rules:\n"
+        "- Only include genuine questions — things the presenter is asking, not stating or instructing\n"
+        "- Do NOT include statements, tips, steps, or instructions (e.g. 'start by describing your product' is NOT a question)\n"
         "- Do NOT rephrase statements as questions\n"
-        "- If there are fewer than 3 real questions in the transcript, return fewer — do not invent any\n"
+        "- If there are no genuine questions at all, return an empty array\n"
         "- Maximum 8 questions\n\n"
-        "For each question found, return the timestamp in seconds (from the [Xs] markers) where it appears "
-        "and the exact question text from the transcript.\n"
-        "Reply ONLY with valid JSON, no other text:\n"
+        "For each question, return the timestamp (from the [Xs] markers) and the question text.\n"
+        "Reply ONLY with valid JSON:\n"
         '{"questions": [{"timestamp": 12.3, "question": "What is X?"}, ...]}\n\n'
         f"Transcript:\n{transcript_text}"
     )
@@ -204,12 +201,13 @@ def detect_questions(body: DetectQuestionsBody):
         conn.close()
         return {"questions": [], "count": 0, "error": "invalid json from ollama"}
 
-    # Insert into notes table
+    # Insert into notes table — filter out obvious non-questions (too short, no verb)
     inserted = []
     for item in items:
         ts = item.get("timestamp")
         q = item.get("question", "").strip()
-        if not q:
+        # Discard if too short (likely a fragment) or doesn't contain a question word or verb
+        if not q or len(q.split()) < 5:
             continue
         cur = conn.execute(
             "INSERT INTO notes (video_id, timestamp_seconds, body, is_question, source) VALUES (?, ?, ?, 1, 'ollama')",
