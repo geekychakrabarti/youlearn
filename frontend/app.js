@@ -3257,10 +3257,21 @@ document.getElementById('btn-detect-questions').addEventListener('click', async 
     });
     await loadClipsAndNotes();
     const n = result.count || 0;
-    btn.dataset.state = 'done';
-    btn.textContent = `✓ ${n} question${n === 1 ? '' : 's'} detected · Re-analyse`;
     btn.disabled = false;
-    if (n > 0) switchTab('questions');
+    if (result.error || result.reason) {
+      // Ollama unavailable, no transcript, etc.
+      const msg = result.reason === 'no questions found in transcript'
+        ? 'No questions found in this transcript'
+        : (result.error || result.reason);
+      btn.dataset.state = '';
+      btn.textContent = '✦ Detect questions in transcript';
+      toast(msg);
+    } else {
+      btn.dataset.state = 'done';
+      btn.textContent = `✓ ${n} question${n === 1 ? '' : 's'} detected · Re-analyse`;
+      if (n > 0) switchTab('questions');
+      else toast('No questions found in this transcript');
+    }
   } catch (e) {
     btn.textContent = '✦ Detect questions in transcript';
     btn.disabled = false;
