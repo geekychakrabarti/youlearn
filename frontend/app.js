@@ -1068,7 +1068,7 @@ function renderClipsList() {
   // Clips tab shows only highlights and skips
   const displayClips = state.clips.filter(c => c.type === 'highlight' || c.type === 'skip');
   if (!displayClips.length) {
-    container.innerHTML = '<p style="padding:12px;color:var(--text2);font-size:12px">No clips yet.<br>M = highlight · S = skip</p>';
+    container.innerHTML = '<p style="padding:12px;color:var(--text2);font-size:12px">No clips yet.<br>C = clip phase · M = manual range · S = skip</p>';
     return;
   }
   const icons = { highlight: '■', skip: '■' };
