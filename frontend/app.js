@@ -993,9 +993,9 @@ function renderTimelineMarkers() {
   // ── Layer 2: Annotations (notes & questions) ──
   state.notes.forEach(n => {
     if (n.timestamp_seconds == null) return;
+    if (n.source === 'ollama') return; // AI questions suppressed — feature pending (task #43)
     const mark = document.createElement('div');
-    const isOllama = n.source === 'ollama';
-    mark.className = n.is_question ? (isOllama ? 'tl-question-detected' : 'tl-question') : 'tl-note';
+    mark.className = n.is_question ? 'tl-question' : 'tl-note';
     mark.style.left = `${(n.timestamp_seconds / dur) * 100}%`;
     mark.title = n.body ? `${fmtTime(n.timestamp_seconds)} — ${n.body}` : fmtTime(n.timestamp_seconds);
     mark.onclick = () => {
@@ -1143,7 +1143,9 @@ function renderNotesList(which) {
   const isQ = which === 'questions';
   const container = document.getElementById(isQ ? 'questions-list' : 'notes-list');
   container.innerHTML = '';
-  const filtered = state.notes.filter(n => isQ ? n.is_question : !n.is_question);
+  const filtered = state.notes.filter(n => isQ
+    ? n.is_question && n.source !== 'ollama'  // suppress AI questions — feature pending (task #43)
+    : !n.is_question);
 
   // Merge and sort by timestamp (ollama questions mixed in with user questions)
   const allItems = [...filtered].sort(
