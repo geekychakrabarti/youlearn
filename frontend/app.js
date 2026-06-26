@@ -1485,7 +1485,7 @@ function toggleTheatreMode() {
 document.getElementById('btn-theatre').onclick = toggleTheatreMode;
 document.getElementById('btn-prev-clip').onclick = prevClip;
 document.getElementById('btn-next-clip').onclick = nextClip;
-document.getElementById('btn-mark-highlight').onclick = () => handleClipKey('highlight');
+document.getElementById('btn-mark-highlight').onclick = () => smartClipAtPlayhead();
 document.getElementById('btn-mark-note').onclick = () => handleClipKey('note');
 document.getElementById('btn-mark-question').onclick = () => handleClipKey('question');
 document.getElementById('btn-mark-skip').onclick = () => handleClipKey('skip');

@@ -136,7 +136,8 @@
       <div class="empty-state-mid">
         <p>Select a video from the library to start watching.</p>
       <p class="hint">
-        <kbd>M</kbd> highlight &nbsp;
+        <kbd>C</kbd> clip &nbsp;
+        <kbd>M</kbd> manual range &nbsp;
         <kbd>N</kbd> note &nbsp;
         <kbd>Q</kbd> question &nbsp;
         <kbd>S</kbd> skip &nbsp;
@@ -182,7 +183,7 @@
         <button id="btn-seek-fwd" title="+5s (→)">5s▶</button>
         <button id="btn-next-clip" title="Next clip (K)">⏭</button>
         <div class="mark-btns">
-          <button id="btn-mark-highlight" class="mark-btn highlight" title="Highlight range — tap twice (M)"><span class="mark-icon mark-icon-highlight">▬</span> Mark</button>
+          <button id="btn-mark-highlight" class="mark-btn highlight" title="Clip semantic phase (C) — or tap twice for manual range (M)"><span class="mark-icon mark-icon-highlight">▬</span> Clip</button>
           <button id="btn-mark-note" class="mark-btn note" title="Note at current time (N)"><span class="mark-icon mark-icon-note">●</span> Note</button>
           <button id="btn-mark-question" class="mark-btn question" title="Question (Q)"><span class="mark-icon mark-icon-question">▲</span> Question</button>
           <button id="btn-mark-skip" class="mark-btn skip" title="Skip section — tap twice (S)"><span class="mark-icon mark-icon-skip">░</span> Skip</button>
@@ -286,11 +287,11 @@
         </div>
         <div class="help-section">
           <div class="help-section-title">Marking</div>
-          <div class="help-row"><kbd>M</kbd><span>Highlight range — tap twice for start/end</span></div>
+          <div class="help-row"><kbd>C</kbd><span>Clip semantic phase (idea boundary)</span></div>
+          <div class="help-row"><kbd>M</kbd><span>Manual highlight range — tap twice for start/end</span></div>
           <div class="help-row"><kbd>N</kbd><span>Note at current time</span></div>
           <div class="help-row"><kbd>Q</kbd><span>Question</span></div>
           <div class="help-row"><kbd>S</kbd><span>Skip section — tap twice for start/end</span></div>
-          <div class="help-row"><kbd>C</kbd><span>Clip current transcript search match</span></div>
           <div class="help-row"><kbd>Esc</kbd><span>Cancel pending mark</span></div>
         </div>
         <div class="help-section">
@@ -362,7 +363,8 @@
         <div class="help-section">
           <h3>Keyboard Shortcuts</h3>
           <table class="help-table">
-            <tr><td><kbd>M</kbd></td><td>Highlight range (two-tap)</td></tr>
+            <tr><td><kbd>C</kbd></td><td>Clip semantic phase (idea boundary)</td></tr>
+            <tr><td><kbd>M</kbd></td><td>Manual highlight range (two-tap)</td></tr>
             <tr><td><kbd>N</kbd></td><td>Add note at current time</td></tr>
             <tr><td><kbd>Q</kbd></td><td>Add question at current time</td></tr>
             <tr><td><kbd>S</kbd></td><td>Skip zone (two-tap)</td></tr>
@@ -403,7 +405,7 @@
   </div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="/static/app.js?v=147"></script>
+  <script src="/static/app.js?v=148"></script>
   <script src="/static/tour.js"></script>
 </body>
 </html>
