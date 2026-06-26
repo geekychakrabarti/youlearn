@@ -35,6 +35,8 @@ const state = {
   previewDensity: [],
   previewChapters: [],
   previewSummaries: {},
+  videoSegments: [],              // Ollama semantic segments {start_seconds, end_seconds, concept_label}
+  videoSegmentsGenerating: false,
   previewTranscript: [],         // raw transcript entries for within-video search
   tsearchMatches: [],            // current transcript search hit indices
   tsearchIdx: 0,                 // which match we're on
@@ -925,6 +927,24 @@ async function openVideo(video) {
   renderTimelineMarkers();
   renderAllList(); // re-render now that chapters are available
 
+  // Fetch semantic segments (fire-and-forget — used by C key smart clip)
+  state.videoSegments = [];
+  state.videoSegmentsGenerating = false;
+  api.get(`/api/segments?youtube_id=${ytId}`)
+    .then(result => {
+      state.videoSegments = result.segments || [];
+      state.videoSegmentsGenerating = result.generating || false;
+      // If still generating, poll once after 15s
+      if (result.generating) {
+        setTimeout(() => {
+          api.get(`/api/segments?youtube_id=${ytId}`)
+            .then(r => { state.videoSegments = r.segments || []; state.videoSegmentsGenerating = false; })
+            .catch(() => {});
+        }, 15000);
+      }
+    })
+    .catch(() => {});
+
   // Fetch Ollama summaries if available
   if (chapters.length) {
     const placeholders = {};
@@ -1236,6 +1256,8 @@ async function deleteVideo(id) {
     document.getElementById('tab-btn-chapters').style.display = 'none';
     document.getElementById('transcript-search-section').style.display = 'none';
     document.getElementById('questions-detect-bar').style.display = 'none';
+    state.videoSegments = [];
+    state.videoSegmentsGenerating = false;
     switchTab('all');
   }
   await loadVideos(); toast('Video removed');
@@ -2126,45 +2148,45 @@ async function markCurrentSearchMatch() {
 /* ── Smart clip at playhead (C key) — Ollama finds idea boundary ── */
 async function smartClipAtPlayhead() {
   if (!state.ytPlayer || !state.activeVideoId || state.previewVideo) return;
+  const t = state.ytPlayer.getCurrentTime();
+
+  // Primary path: use pre-computed semantic segment containing playhead
+  if (state.videoSegments.length) {
+    const seg = state.videoSegments.find(s => s.start_seconds <= t && t <= s.end_seconds);
+    if (seg) {
+      await api.post('/api/clips', {
+        video_id: state.activeVideoId,
+        timestamp_seconds: seg.start_seconds,
+        end_seconds: seg.end_seconds,
+        label: seg.concept_label,
+        type: 'highlight',
+      });
+      await loadClipsAndNotes();
+      toast(`⭐ ${seg.concept_label} — ${fmtTime(seg.start_seconds)} → ${fmtTime(seg.end_seconds)}`);
+      return;
+    }
+  }
+
+  // Fallback: segments not ready yet — use transcript entry boundary
+  if (state.videoSegmentsGenerating) {
+    toast('Segments still generating — try again in a moment');
+    return;
+  }
   if (!state.previewTranscript.length) { toast('No transcript available for smart clip'); return; }
 
-  const t = state.ytPlayer.getCurrentTime();
-  // Find transcript entry containing current playhead
-  let idx = state.previewTranscript.findIndex(
-    (e, i) => e.start <= t && t < (state.previewTranscript[i + 1]?.start ?? e.start + (e.duration || 5))
-  );
-  if (idx === -1) idx = state.previewTranscript.filter(e => e.start <= t).length - 1;
-  if (idx < 0) { toast('Playhead is before transcript start'); return; }
-
-  // Use playhead ±15s as rough range — Ollama will tighten to idea boundary
-  const roughStart = Math.max(0, t - 5);  // small lookback — idea likely starts near playhead
-  const roughEnd = t + 90;               // wide lookahead — give Ollama room to find end of idea
-  const video = state.videos.find(v => v.id === state.activeVideoId);
-  const ytId = video?.youtube_id;
-  if (!ytId) return;
-
-  toast('✨ Finding idea boundary…', 4000);
-  try {
-    const result = await api.post('/api/videos/refine-clip', {
-      youtube_id: ytId,
-      start_seconds: roughStart,
-      end_seconds: roughEnd,
-    });
-    const clipStart = result.start ?? roughStart;
-    const clipEnd = result.end ?? roughEnd;
-    const label = state.previewTranscript.find(e => e.start >= clipStart)?.text?.slice(0, 60) || '';
-    await api.post('/api/clips', {
-      video_id: state.activeVideoId,
-      timestamp_seconds: clipStart,
-      end_seconds: clipEnd,
-      label,
-      type: 'highlight',
-    });
-    await loadClipsAndNotes();
-    toast(`⭐ Clipped ${fmtTime(clipStart)} → ${fmtTime(clipEnd)}${result.reason ? ' — ' + result.reason : ''}`);
-  } catch (e) {
-    toast('Smart clip failed — is Ollama running?');
-  }
+  let idx = state.previewTranscript.filter(e => e.start <= t).length - 1;
+  if (idx < 0) { toast('Playhead before transcript start'); return; }
+  const entry = state.previewTranscript[idx];
+  const next = state.previewTranscript[idx + 1];
+  await api.post('/api/clips', {
+    video_id: state.activeVideoId,
+    timestamp_seconds: entry.start,
+    end_seconds: next ? next.start : entry.start + (entry.duration || 4),
+    label: entry.text.slice(0, 60),
+    type: 'highlight',
+  });
+  await loadClipsAndNotes();
+  toast('⭐ Clipped (segments not yet available)');
 }
 
 /* ── Ollama clip edge refinement ── */

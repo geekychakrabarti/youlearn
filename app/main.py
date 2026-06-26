@@ -8,7 +8,7 @@ from typing import Optional
 
 from app.db import init_db
 from app.config import load_config, save_config
-from app.routes import playlists, videos, clips, notes, export, search, downloads, teachers, learn
+from app.routes import playlists, videos, clips, notes, export, search, downloads, teachers, learn, segments
 
 app = FastAPI(title="YouLearn", version="0.1.0")
 
@@ -49,6 +49,7 @@ app.include_router(search.router)
 app.include_router(downloads.router)
 app.include_router(teachers.router)
 app.include_router(learn.router)
+app.include_router(segments.router)
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")

@@ -155,6 +155,12 @@ def _enrich_video(video_id: int, youtube_id: str):
             threading.Thread(target=_generate_semantic_tags_bg, args=(ytid,), daemon=True).start()
     except Exception:
         pass
+    # Auto-generate video segments in background
+    try:
+        from app.routes.segments import _generate_segments_bg
+        threading.Thread(target=_generate_segments_bg, args=(video_id, youtube_id), daemon=True).start()
+    except Exception:
+        pass
 
 
 def _generate_semantic_tags_bg(youtube_id: str):

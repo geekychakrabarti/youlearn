@@ -85,6 +85,15 @@ CREATE TABLE IF NOT EXISTS trusted_channels (
     notes TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS video_segments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    video_id INTEGER REFERENCES videos(id) ON DELETE CASCADE,
+    start_seconds REAL NOT NULL,
+    end_seconds REAL NOT NULL,
+    concept_label TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 """
 
 
