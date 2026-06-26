@@ -169,7 +169,7 @@ def detect_questions(body: DetectQuestionsBody):
     )
 
     payload = json.dumps({
-        "model": "gemma3:4b",
+        "model": "gemma3:12b",
         "prompt": prompt,
         "stream": False,
         "options": {"temperature": 0.1, "num_predict": 400},
