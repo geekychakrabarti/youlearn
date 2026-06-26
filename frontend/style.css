@@ -235,12 +235,13 @@ kbd { background: var(--bg3); border: 1px solid var(--border); border-radius: 3p
   transition: transform 0.1s;
 }
 .tl-question:hover { transform: translateX(-50%) scale(1.5); }
-/* Ollama-detected question — hollow orange circle */
+/* Ollama-detected question — hollow orange triangle (unfilled, same shape as user question) */
 .tl-question-detected {
   position: absolute; top: calc(100% + 2px); transform: translateX(-50%);
-  width: 9px; height: 9px; border-radius: 50%;
-  background: transparent;
-  border: 2px solid var(--question);
+  width: 11px; height: 10px;
+  background: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='10'%3E%3Cpolygon points='5.5,1 10,9 1,9' fill='none' stroke='%23f5a623' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
   pointer-events: all; cursor: pointer;
   transition: transform 0.1s;
 }

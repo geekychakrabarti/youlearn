@@ -3227,17 +3227,8 @@ document.getElementById('help-overlay').addEventListener('click', (e) => {
 function updateDetectQuestionsBar() {
   const bar = document.getElementById('questions-detect-bar');
   if (!bar) return;
-  // Show for Library videos (not preview). Hide only if Ollama is explicitly known unavailable.
-  const visible = !!state.activeVideoId && !state.previewVideo && state.ollamaAvailable !== false;
-  bar.style.display = visible ? 'block' : 'none';
-  // If Ollama unavailable, update button to explain why
-  const btn = document.getElementById('btn-detect-questions');
-  if (btn && state.ollamaAvailable === false) {
-    btn.textContent = '✦ Detect questions (requires Ollama)';
-    btn.title = 'Install Ollama and run: ollama pull gemma3:4b';
-    btn.style.opacity = '0.5';
-    bar.style.display = 'block'; // still show it, just greyed out
-  }
+  // Feature suppressed pending higher signal quality — keep hidden
+  bar.style.display = 'none';
 }
 
 document.getElementById('btn-detect-questions').addEventListener('click', async function () {
