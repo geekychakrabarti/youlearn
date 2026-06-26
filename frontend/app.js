@@ -1267,6 +1267,7 @@ document.addEventListener('keydown', (e) => {
   if (document.getElementById('modal-overlay').style.display !== 'none') return;
   if (e.key === '?' || e.key === '/') { e.preventDefault(); toggleHelp(); return; }
   if (document.getElementById('help-overlay').style.display !== 'none') { toggleHelp(); return; }
+  if (e.metaKey || e.ctrlKey) return; // don't intercept Cmd/Ctrl shortcuts (copy, paste, etc.)
   switch (e.key) {
     case ' ':          e.preventDefault(); togglePlayPause(); break;
     case 'ArrowLeft':  e.preventDefault(); nudgeSeek(-5); break;
@@ -1280,7 +1281,6 @@ document.addEventListener('keydown', (e) => {
     case 'k': case 'K': nextClip(); break;
     case '[':           e.preventDefault(); tsearchNav(-1); break;
     case ']':           e.preventDefault(); tsearchNav(+1); break;
-    case 'c': case 'C': smartClipAtPlayhead(); break;
     case 'Escape':
       if (document.body.classList.contains('theatre-mode')) toggleTheatreMode();
       else cancelPending();
@@ -2137,8 +2137,8 @@ async function smartClipAtPlayhead() {
   if (idx < 0) { toast('Playhead is before transcript start'); return; }
 
   // Use playhead ±15s as rough range — Ollama will tighten to idea boundary
-  const roughStart = Math.max(0, t - 15);
-  const roughEnd = t + 15;
+  const roughStart = Math.max(0, t - 5);  // small lookback — idea likely starts near playhead
+  const roughEnd = t + 90;               // wide lookahead — give Ollama room to find end of idea
   const video = state.videos.find(v => v.id === state.activeVideoId);
   const ytId = video?.youtube_id;
   if (!ytId) return;
