@@ -171,7 +171,7 @@ The transport bar at the bottom contains:
 | ▶ / ⏸ | Play / Pause |
 | 5s▶ | Skip forward 5 seconds |
 | ⏭ | Jump to next marker |
-| Mark | Highlight range (tap twice) |
+| **Clip** | Smart clip — clips the current semantic phase (C) |
 | Note | Add a note at current time |
 | Question | Mark a question at current time |
 | Skip | Mark a skip zone (tap twice) |
@@ -181,7 +181,8 @@ The transport bar at the bottom contains:
 
 While a video plays, you can mark moments without stopping:
 
-- **M** — Start/end a highlight range (yellow bar on timeline)
+- **C** — Clip the current semantic phase (Ollama-detected idea boundary). Instant — no two-tap needed.
+- **M** — Start/end a manual highlight range (tap twice). Use when you want a custom range within a phase.
 - **N** — Add a note at the current timestamp
 - **Q** — Mark a question (orange triangle)
 - **S** — Start/end a skip zone (grey bar — fast-forward through boring parts)
@@ -325,6 +326,7 @@ When searching transcripts, results show a snippet of context around the match. 
 | `duration:long` | — | Over 20 minutes |
 | `order:views` | `houdini order:views` | Sort by most viewed |
 | `order:recent` | `vex order:recent` | Sort by newest |
+| `category:education` | `python category:education` | Filter to educational content |
 
 ---
 
@@ -332,7 +334,8 @@ When searching transcripts, results show a snippet of context around the match. 
 
 | Key | Action |
 |-----|--------|
-| `M` | Highlight range — press once to start, once to end |
+| `C` | Clip semantic phase (idea boundary — instant) |
+| `M` | Manual highlight range — press once to start, once to end |
 | `N` | Note at current timestamp |
 | `Q` | Question at current timestamp |
 | `S` | Skip zone — press once to start, once to end |
@@ -344,8 +347,8 @@ When searching transcripts, results show a snippet of context around the match. 
 | `←` | Rewind 5 seconds |
 | `→` | Skip forward 5 seconds |
 | `T` | Toggle theatre mode |
-| `Escape` | Exit theatre mode |
-| `?` | Show all shortcuts overlay |
+| `Escape` | Exit theatre mode / cancel pending mark |
+| `?` / `/` | Show all shortcuts overlay |
 
 ---
 

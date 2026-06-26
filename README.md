@@ -11,7 +11,7 @@
 - **Library** — Curated playlists of YouTube videos, downloaded locally for instant seeking
 - **Discover** — Search YouTube with operators (`from:channel`, `duration:short`, `order:views`) — no recommendations, no rabbit holes
 - **Transcripts** — Full scrollable transcript synced to playback, searchable with `in:transcripts`
-- **Clips & Notes** — Mark highlights (M), notes (N), questions (Q), skip zones (S) with timestamps
+- **Clips & Notes** — Smart clip (C) captures the current semantic phase; manual range (M), notes (N), questions (Q), skip zones (S)
 - **All tab** — Chapters, clips, notes and questions in one chronological timeline
 - **Similar Projects** — Find related videos at the same difficulty level using semantic tags
 - **What's next?** — AI-powered suggestions for what to learn next based on your questions and watched videos
@@ -107,7 +107,8 @@ If Ollama is not running, these features show a clear install message and everyt
 
 | Key | Action |
 |-----|--------|
-| `M` | Highlight range (tap twice for start/end) |
+| `C` | Clip semantic phase (idea boundary — instant) |
+| `M` | Manual highlight range (tap twice for start/end) |
 | `N` | Note at current time |
 | `Q` | Question at current time |
 | `S` | Skip zone (tap twice) |
@@ -116,8 +117,8 @@ If Ollama is not running, these features show a clear install message and everyt
 | `Space` | Play / pause |
 | `←` / `→` | ±5 seconds |
 | `T` | Theatre mode (hide panels) |
-| `Escape` | Exit theatre mode |
-| `?` | Show all shortcuts |
+| `Escape` | Exit theatre mode / cancel pending mark |
+| `?` / `/` | Show all shortcuts |
 
 ---
 
@@ -139,6 +140,7 @@ If Ollama is not running, these features show a clear install message and everyt
 | `duration:long` | `vex duration:long` | Over 20 min |
 | `order:views` | `geometry nodes order:views` | Sort by most viewed |
 | `order:recent` | `houdini order:recent` | Sort by newest |
+| `category:education` | `python category:education` | Filter to educational content |
 
 ---
 

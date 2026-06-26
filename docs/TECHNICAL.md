@@ -35,13 +35,16 @@ videos    (id, playlist_id, url, youtube_id, title, duration_seconds, thumbnail,
            chapters_json, channel, added_at, last_position_seconds,
            local_path, download_status)
 clips     (id, video_id, timestamp_seconds, end_seconds, label, type, ollama_refined, created_at)
-notes     (id, video_id, timestamp_seconds, body, is_question, created_at)
+notes     (id, video_id, timestamp_seconds, body, is_question, source, created_at)
 tags      (id, name, parent_id)
 video_tags(video_id, tag_id)
 trusted_channels (id, channel_id, name, thumbnail, notes, created_at)
+video_segments   (id, video_id, start_seconds, end_seconds, concept_label, created_at)
 ```
 
 **Clip types:** `highlight`, `question`, `skip`, `note`, `extract`
+
+**Note source values:** `user` (Q-key), `ollama` (AI-detected — currently suppressed)
 
 **Learning types (Ollama-generated):** `project_tutorial`, `concept_explainer`, `tips_tricks`, `comparison`, `showcase`
 
@@ -80,7 +83,15 @@ Base URL: `http://localhost:8000`
 | PATCH | `/api/clips/{id}` | Update clip |
 | DELETE | `/api/clips/{id}` | Delete clip |
 | POST | `/api/notes` | Create note/question |
+| PATCH | `/api/notes/{id}` | Update note |
 | DELETE | `/api/notes/{id}` | Delete note |
+| POST | `/api/notes/detect-questions` | Detect questions in transcript via Ollama (suppressed) |
+
+### Segments
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/segments?youtube_id=` | Get cached semantic segments (triggers background generation if none) |
+| POST | `/api/segments/generate` | Force (re-)generate segments for a video |
 
 ### Search
 | Method | Path | Description |
@@ -198,7 +209,25 @@ Triggered by: `T` key, `⤢` button in transport bar. Exits with `Escape` or `T`
 - State: `localStorage.yl_tour_done = '1'` after completion
 - Relaunchable via: menu bar "? Start Tour" → opens `#start-tour` hash → `window.startTour()`
 
+### Semantic Video Segmentation (C key Smart Clip)
+
+On video open, the full transcript is sent to Ollama (`gemma3:12b`) once to divide the video into semantic phases:
+
+1. `GET /api/segments?youtube_id=` checks `video_segments` table
+2. If empty, triggers `_generate_segments_bg()` in a daemon thread and returns `generating: true`
+3. Background function sends full timestamped transcript to Ollama with a segmentation prompt
+4. Ollama returns 5-16 contiguous segments: `{start, end, label}`
+5. Segments cached in `video_segments` table
+
+When the user presses **C**:
+- Frontend looks up `state.videoSegments` for the segment containing the current playhead
+- Creates a highlight clip with exact `start_seconds` / `end_seconds` from the segment — no per-clip Ollama call
+- Falls back to transcript entry boundary if segments not yet ready
+
+New videos also trigger `_generate_segments_bg` automatically via `_enrich_video()`.
+
 ### Search History
+
 
 Discover searches saved to `localStorage.yl_search_history` (max 10 entries):
 - Saved on every manual search (not related searches)
